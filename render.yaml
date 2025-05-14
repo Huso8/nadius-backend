@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: nadius-api
+    env: node
+    region: frankfurt
+    buildCommand: npm run build
+    startCommand: npm start
+    watchForFileChanges: true
