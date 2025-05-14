@@ -13,7 +13,8 @@
 		"resolveJsonModule": true
 	},
 	"include": [
-		"src/**/*"
+		"src/**/*",
+		"tsconfig.json"
 	],
 	"exclude": [
 		"node_modules"
