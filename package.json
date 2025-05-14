@@ -2,12 +2,11 @@
 	"name": "nadius-server",
 	"version": "1.0.0",
 	"description": "Backend for Nadius bakery",
-	"main": "dist/index.js",
 	"scripts": {
 		"start": "node dist/index.js",
 		"dev": "ts-node src/index.ts",
 		"build": "tsc",
-		"test": "jest"
+		"postbuild": "ls -la dist/"
 	},
 	"dependencies": {
 		"@types/bcryptjs": "^2.4.6",
