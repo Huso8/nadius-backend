@@ -4,5 +4,5 @@ services:
     env: node
     region: frankfurt
     buildCommand: npm run build
-    startCommand: node dist/index.js
-    rootDirectory: ./
+    startCommand: npm start
+    watchForFileChanges: true
