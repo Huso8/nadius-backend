@@ -10,9 +10,6 @@
 		"postbuild": "ls -la dist/"
 	},
 	"dependencies": {
-		"@types/bcryptjs": "^2.4.6",
-		"@types/jsonwebtoken": "^9.0.9",
-		"bcryptjs": "^3.0.2",
 		"cors": "^2.8.5",
 		"dotenv": "^16.0.3",
 		"express": "^4.18.2",
