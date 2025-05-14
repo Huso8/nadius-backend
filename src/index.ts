@@ -1,26 +1,31 @@
 import dotenv from 'dotenv';
-import express from 'express';
-import mongoose from 'mongoose';
+import { connectDB } from './config/database';
+import { seedDatabase } from './seed';
+import app from './app';
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+// Принудительно устанавливаем порт 5000 для сервера
+const PORT = 5000;
 
-// Подключение к MongoDB
-mongoose.connect(process.env.MONGO_URI!)
-	.then(() => {
-		console.log('MongoDB connected');
+const startServer = async () => {
+	try {
+		// Подключаемся к базе данных
+		await connectDB();
+
+		// Запускаем сидер только в development
+		if (process.env.NODE_ENV === 'development') {
+			await seedDatabase();
+		}
+
+		// Запускаем сервер
 		app.listen(PORT, () => {
-			console.log(`Server running on port ${PORT}`);
+			console.log(`Server is running on port ${PORT}`);
 		});
-	})
-	.catch(err => {
-		console.error('MongoDB connection error:', err);
+	} catch (error) {
+		console.error('Failed to start server:', error);
 		process.exit(1);
-	});
+	}
+};
 
-// Пример маршрута
-app.get('/api', (req, res) => {
-	res.json({ message: 'API работает!' });
-});
+startServer(); 
