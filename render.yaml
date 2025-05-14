@@ -5,5 +5,5 @@ services:
     region: frankfurt
     rootDirectory: ./
     buildCommand: npm run build
-    startCommand: node dist/server.js
+    startCommand: node dist/index.js
     watchForFileChanges: true
