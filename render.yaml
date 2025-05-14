@@ -3,7 +3,7 @@ services:
     name: nadius-api
     env: node
     region: frankfurt
-    buildCommand: npm run build
+    buildCommand: tsc && node dist/index.js
     startCommand: node dist/index.js
     watchForFileChanges: true
     rootDirectory: ./src
