@@ -27,8 +27,7 @@ const corsOptions = {
 	},
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
-	credentials: true,
-	optionsSuccessStatus: 200 // для некоторых старых браузеров
+	credentials: true
 };
 
 // Middleware
