@@ -23,10 +23,10 @@ app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
-app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/reviews', reviewRoutes);
+app.use('/products', productRoutes);
+app.use('/orders', orderRoutes);
+app.use('/auth', authRoutes);
+app.use('/reviews', reviewRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
