@@ -12,7 +12,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-	origin: ['http://localhost:3001', 'http://127.0.0.1:3001'],
+	origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
 	credentials: true
