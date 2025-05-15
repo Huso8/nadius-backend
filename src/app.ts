@@ -12,10 +12,23 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-	origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+	origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+		const allowedOrigins = [
+			'https://www.nadius.ru ',
+			'https://nadius.ru ',
+			'http://localhost:3000'
+		];
+
+		if (!origin || allowedOrigins.includes(origin)) {
+			callback(null, true);
+		} else {
+			callback(new Error('CORS: Not allowed by CORS policy'));
+		}
+	},
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
 	allowedHeaders: ['Content-Type', 'Authorization'],
-	credentials: true
+	credentials: true,
+	optionsSuccessStatus: 200 // для некоторых старых браузеров
 };
 
 // Middleware
