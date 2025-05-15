@@ -1,11 +1,11 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Product from '../models/Product';
 import mongoose from 'mongoose';
 
 const router = express.Router();
 
 // Получить все продукты
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const products = await Product.find();
 		res.json(products);
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Получить продукт по ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).json({ message: 'Некорректный ID продукта' });
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Создать новый продукт
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
 		const product = new Product(req.body);
 		const savedProduct = await product.save();
@@ -42,7 +42,7 @@ router.post('/', async (req, res) => {
 });
 
 // Обновить продукт
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).json({ message: 'Некорректный ID продукта' });
@@ -62,7 +62,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Удалить продукт
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
 			return res.status(400).json({ message: 'Некорректный ID продукта' });

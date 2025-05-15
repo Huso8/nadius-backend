@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import Order from '../models/Order';
 import { auth } from '../middleware/auth';
 import { getUserOrders } from '../controllers/orderController';
@@ -9,7 +9,7 @@ const router = express.Router();
 router.get('/my', auth, getUserOrders);
 
 // Получить все заказы
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const orders = await Order.find().populate('items.product');
 		res.json(orders);
@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
 });
 
 // Получить заказ по ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const order = await Order.findById(req.params.id).populate('items.product');
 		if (!order) {
@@ -32,7 +32,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // Создать новый заказ
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
 		const order = new Order(req.body);
 		const savedOrder = await order.save();
@@ -44,7 +44,7 @@ router.post('/', async (req, res) => {
 });
 
 // Обновить статус заказа
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', async (req: Request, res: Response) => {
 	try {
 		const { status } = req.body;
 		const order = await Order.findByIdAndUpdate(
