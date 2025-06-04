@@ -16,7 +16,10 @@ const corsOptions = {
 		const allowedOrigins = [
 			'https://www.nadius.ru',
 			'https://nadius.ru',
-			'http://localhost:3000'
+			'http://localhost:3000',
+			'http://localhost:5173',
+			'http://127.0.0.1:3000',
+			'http://127.0.0.1:5173'
 		];
 
 		if (!origin || allowedOrigins.includes(origin)) {
@@ -26,8 +29,10 @@ const corsOptions = {
 		}
 	},
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization'],
-	credentials: true
+	allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+	exposedHeaders: ['Content-Range', 'X-Content-Range'],
+	credentials: true,
+	maxAge: 86400 // 24 часа
 };
 
 // Middleware
