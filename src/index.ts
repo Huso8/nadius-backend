@@ -14,9 +14,9 @@ const startServer = async () => {
 		await connectDB();
 
 		// Запускаем сидер только в development
-		if (process.env.NODE_ENV === 'development') {
-			await seedDatabase();
-		}
+		// if (process.env.NODE_ENV === 'development') {
+		// 	await seedDatabase();
+		// }
 
 		// Запускаем сервер
 		app.listen(PORT, () => {
