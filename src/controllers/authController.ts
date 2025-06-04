@@ -73,4 +73,22 @@ export const login = async (req: Request, res: Response) => {
 	} catch (error) {
 		res.status(500).json({ message: 'Ошибка при входе' });
 	}
+};
+
+export const me = async (req: Request, res: Response) => {
+	try {
+		const user = await User.findById(req.user?.userId);
+		if (!user) {
+			return res.status(404).json({ message: 'Пользователь не найден' });
+		}
+
+		res.json({
+			id: user._id,
+			email: user.email,
+			name: user.name,
+			role: user.role
+		});
+	} catch (error) {
+		res.status(500).json({ message: 'Ошибка при получении данных пользователя' });
+	}
 }; 
