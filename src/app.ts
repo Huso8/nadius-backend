@@ -1,10 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
 import authRoutes from './routes/authRoutes';
 import reviewRoutes from './routes/reviewRoutes';
+import addressRoutes from './routes/addressRoutes';
 
 dotenv.config();
 
@@ -29,30 +31,26 @@ const corsOptions = {
 		}
 	},
 	methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-	allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-	exposedHeaders: ['Content-Range', 'X-Content-Range'],
-	credentials: true,
-	maxAge: 86400 // 24 часа
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	credentials: true
 };
 
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Настройка статических файлов
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
 // Routes
-app.use('/products', productRoutes);
-app.use('/orders', orderRoutes);
-app.use('/auth', authRoutes);
-app.use('/reviews', reviewRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/address', addressRoutes);
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-	console.error('Error details:', {
-		message: err.message,
-		stack: err.stack,
-		path: req.path,
-		method: req.method
-	});
 	res.status(500).json({
 		message: 'Что-то пошло не так!',
 		error: process.env.NODE_ENV === 'development' ? err.message : undefined

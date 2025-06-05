@@ -28,12 +28,14 @@ export const register = async (req: Request, res: Response) => {
 		);
 
 		res.status(201).json({
-			token,
-			user: {
-				id: user._id,
-				email: user.email,
-				name: user.name,
-				role: user.role
+			data: {
+				token,
+				user: {
+					id: user._id,
+					email: user.email,
+					name: user.name,
+					role: user.role
+				}
 			}
 		});
 	} catch (error) {
@@ -62,12 +64,14 @@ export const login = async (req: Request, res: Response) => {
 		);
 
 		res.json({
-			token,
-			user: {
-				id: user._id,
-				email: user.email,
-				name: user.name,
-				role: user.role
+			data: {
+				token,
+				user: {
+					id: user._id,
+					email: user.email,
+					name: user.name,
+					role: user.role
+				}
 			}
 		});
 	} catch (error) {
@@ -83,10 +87,12 @@ export const me = async (req: Request, res: Response) => {
 		}
 
 		res.json({
-			id: user._id,
-			email: user.email,
-			name: user.name,
-			role: user.role
+			data: {
+				id: user._id,
+				email: user.email,
+				name: user.name,
+				role: user.role
+			}
 		});
 	} catch (error) {
 		res.status(500).json({ message: 'Ошибка при получении данных пользователя' });

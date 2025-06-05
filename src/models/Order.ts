@@ -6,11 +6,28 @@ export interface IOrderItem {
 	price: number;
 }
 
+export interface ICoordinates {
+	lat: number;
+	lon: number;
+}
+
+export interface IContactInfo {
+	name: string;
+	email: string;
+	phone: string;
+}
+
 export interface IOrder extends Document {
 	user: mongoose.Types.ObjectId;
 	items: IOrderItem[];
 	totalAmount: number;
 	status: 'pending' | 'processing' | 'completed' | 'cancelled';
+	deliveryAddress: {
+		address: string;
+		coordinates: ICoordinates | null;
+	};
+	contactInfo: IContactInfo;
+	comment?: string;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -47,6 +64,33 @@ const orderSchema = new Schema({
 		type: String,
 		enum: ['pending', 'processing', 'completed', 'cancelled'],
 		default: 'pending'
+	},
+	deliveryAddress: {
+		address: {
+			type: String,
+			required: true
+		},
+		coordinates: {
+			lat: Number,
+			lon: Number
+		}
+	},
+	contactInfo: {
+		name: {
+			type: String,
+			required: true
+		},
+		email: {
+			type: String,
+			required: true
+		},
+		phone: {
+			type: String,
+			required: true
+		}
+	},
+	comment: {
+		type: String
 	}
 }, {
 	timestamps: true

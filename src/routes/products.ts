@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import Product from '../models/Product';
 import mongoose from 'mongoose';
+import { upload } from '../middleware/upload';
 
 const router = express.Router();
 
@@ -31,11 +32,28 @@ router.get('/:id', async (req: Request, res: Response) => {
 });
 
 // Создать новый продукт
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', upload.single('image'), async (req: Request & { file?: Express.Multer.File }, res: Response) => {
 	try {
-		const product = new Product(req.body);
-		const savedProduct = await product.save();
-		res.status(201).json(savedProduct);
+		const { name, description, price, category } = req.body;
+
+		// Проверяем, существует ли уже товар с таким именем
+		const existingProduct = await Product.findOne({ name });
+		if (existingProduct) {
+			return res.status(400).json({ message: 'Товар с таким названием уже существует' });
+		}
+
+		const imageUrl = req.file ? `/uploads/products/${req.file.filename}` : null;
+
+		const product = new Product({
+			name,
+			description,
+			price,
+			category,
+			imageUrl
+		});
+
+		await product.save();
+		res.status(201).json(product);
 	} catch (error) {
 		res.status(400).json({ message: 'Ошибка при создании продукта' });
 	}
