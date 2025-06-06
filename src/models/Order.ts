@@ -19,7 +19,7 @@ export interface IContactInfo {
 
 export interface IOrder extends Document {
 	user: mongoose.Types.ObjectId;
-	items: IOrderItem[];
+	products: IOrderItem[];
 	totalAmount: number;
 	status: 'pending' | 'processing' | 'completed' | 'cancelled';
 	deliveryAddress: {
@@ -38,7 +38,7 @@ const orderSchema = new Schema({
 		ref: 'User',
 		required: true
 	},
-	items: [{
+	products: [{
 		product: {
 			type: Schema.Types.ObjectId,
 			ref: 'Product',

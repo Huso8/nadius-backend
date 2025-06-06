@@ -1,57 +1,44 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
 
-const YANDEX_API_KEY = process.env.YANDEX_API_KEY || '18f073a4-54af-4678-9260-bf48dd2a0d69';
-
 export const getAddressSuggestions = async (req: Request, res: Response) => {
 	try {
 		const { query } = req.query;
+		const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
 
-		if (!query || typeof query !== 'string') {
-			return res.status(400).json({ message: 'Query parameter is required' });
+		if (!YANDEX_API_KEY) {
+			return res.status(500).json({ message: 'API ключ не настроен' });
 		}
 
-		const url = 'https://suggest-maps.yandex.ru/v1/suggest';
+		if (!query || typeof query !== 'string') {
+			return res.status(400).json({ message: 'Необходим поисковый запрос' });
+		}
+
+		const url = 'https://geocode-maps.yandex.ru/1.x/';
 		const params = {
 			apikey: YANDEX_API_KEY,
-			text: query,
+			format: 'json',
+			geocode: query,
 			lang: 'ru_RU',
-			results: 5,
-			type: 'address'
+			results: 5
 		};
 
-		const response = await axios.get(url, {
-			params,
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			}
-		});
+		const response = await axios.get(url, { params });
 
-		if (!response.data || !response.data.results) {
+		if (!response.data.response.GeoObjectCollection.featureMember.length) {
 			return res.json({ results: [] });
 		}
 
-		const results = response.data.results.map((item: any) => ({
-			title: item.title,
-			subtitle: item.subtitle,
-			lat: item.point?.lat,
-			lon: item.point?.lon
+		const suggestions = response.data.response.GeoObjectCollection.featureMember.map((item: any) => ({
+			title: item.GeoObject.name,
+			subtitle: item.GeoObject.metaDataProperty.GeocoderMetaData.text,
+			lat: item.GeoObject.Point.pos.split(' ')[1],
+			lon: item.GeoObject.Point.pos.split(' ')[0]
 		}));
 
-		res.json({ results });
-	} catch (error: unknown) {
+		res.json({ results: suggestions });
+	} catch (error) {
 		console.error('Error fetching address suggestions:', error);
-		if (axios.isAxiosError(error)) {
-			console.error('Axios error details:', {
-				status: error.response?.status,
-				statusText: error.response?.statusText,
-				data: error.response?.data
-			});
-		}
-		res.status(500).json({
-			message: 'Ошибка при получении подсказок адресов',
-			error: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : undefined
-		});
+		res.status(500).json({ message: 'Ошибка при получении подсказок адреса' });
 	}
 }; 

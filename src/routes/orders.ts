@@ -1,24 +1,15 @@
 import express, { Request, Response } from 'express';
 import Order from '../models/Order';
 import { auth, adminAuth } from '../middleware/auth';
-import { getUserOrders, createOrder } from '../controllers/orderController';
+import { getUserOrders, createOrder, getOrders } from '../controllers/orderController';
 
 const router = express.Router();
 
+// Получить все заказы (только для админов)
+router.get('/', adminAuth, getOrders);
+
 // Получить заказы пользователя
 router.get('/user', auth, getUserOrders);
-
-// Получить все заказы (только для админов)
-router.get('/', adminAuth, async (req: Request, res: Response) => {
-	try {
-		const orders = await Order.find()
-			.populate('items.product')
-			.populate('user', 'name email');
-		res.json(orders);
-	} catch (error) {
-		res.status(500).json({ message: 'Ошибка при получении заказов' });
-	}
-});
 
 // Получить заказ по ID
 router.get('/:id', auth, async (req: Request, res: Response) => {

@@ -4,10 +4,8 @@ import Order from '../models/Order';
 export const getOrders = async (req: Request, res: Response) => {
 	try {
 		const orders = await Order.find()
-			.populate({
-				path: 'items.product',
-				select: 'name price image'
-			})
+			.populate('products.product')
+			.populate('user', 'name email')
 			.sort({ createdAt: -1 });
 		res.json(orders);
 	} catch (error) {
@@ -31,46 +29,52 @@ export const getOrder = async (req: Request, res: Response) => {
 
 export const createOrder = async (req: Request, res: Response) => {
 	try {
-		console.log('Полученные данные заказа:', JSON.stringify(req.body, null, 2));
-		console.log('Данные пользователя:', JSON.stringify(req.user, null, 2));
+		const { items, deliveryAddress, contactInfo, comment } = req.body;
+		const userId = req.user?.userId;
 
-		if (!req.user?.userId) {
-			console.error('Отсутствует userId в req.user');
-			return res.status(401).json({ message: 'Необходима авторизация' });
+		if (!userId) {
+			return res.status(401).json({ message: 'Требуется авторизация' });
 		}
+
+		if (!items || !Array.isArray(items) || items.length === 0) {
+			return res.status(400).json({ message: 'Необходимо указать товары в заказе' });
+		}
+
+		if (!deliveryAddress || !deliveryAddress.address) {
+			return res.status(400).json({ message: 'Необходимо указать адрес доставки' });
+		}
+
+		if (!contactInfo || !contactInfo.name || !contactInfo.email || !contactInfo.phone) {
+			return res.status(400).json({ message: 'Необходимо указать контактную информацию' });
+		}
+
+		const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
 		const order = new Order({
-			user: req.user.userId,
-			items: req.body.items,
-			totalAmount: req.body.totalAmount,
-			deliveryAddress: req.body.deliveryAddress,
-			contactInfo: req.body.contactInfo,
-			comment: req.body.comment
+			user: userId,
+			products: items.map(item => ({
+				product: item.productId,
+				quantity: item.quantity,
+				price: item.price
+			})),
+			totalAmount,
+			deliveryAddress,
+			contactInfo,
+			comment,
+			status: 'pending'
 		});
-
-		console.log('Созданный объект заказа:', JSON.stringify(order, null, 2));
 
 		const savedOrder = await order.save();
-		console.log('Сохраненный заказ:', JSON.stringify(savedOrder, null, 2));
-
 		const populatedOrder = await Order.findById(savedOrder._id)
-			.populate('items.product')
-			.populate('user', 'name email');
-		console.log('Заказ после популяции:', JSON.stringify(populatedOrder, null, 2));
+			.populate('products.product')
+			.populate('user', 'email name');
 
-		res.status(201).json(populatedOrder);
-	} catch (error) {
-		console.error('Ошибка при создании заказа:', error);
-		if (error instanceof Error) {
-			console.error('Детали ошибки:', {
-				message: error.message,
-				stack: error.stack
-			});
-		}
-		res.status(400).json({
-			message: 'Ошибка при создании заказа',
-			error: error instanceof Error ? error.message : 'Неизвестная ошибка'
+		res.status(201).json({
+			data: populatedOrder
 		});
+	} catch (error) {
+		console.error('Error creating order:', error);
+		res.status(500).json({ message: 'Ошибка при создании заказа' });
 	}
 };
 
@@ -95,28 +99,16 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 export const getUserOrders = async (req: Request, res: Response) => {
 	try {
 		const userId = req.user?.userId;
-		console.log('getUserOrders - userId:', userId);
-		console.log('getUserOrders - req.user:', req.user);
-
 		if (!userId) {
-			return res.status(401).json({ message: 'Необходима авторизация' });
+			return res.status(401).json({ message: 'Требуется авторизация' });
 		}
 
 		const orders = await Order.find({ user: userId })
-			.populate({
-				path: 'items.product',
-				select: 'name price image'
-			})
-			.populate({
-				path: 'user',
-				select: 'name email'
-			})
+			.populate('products.product')
 			.sort({ createdAt: -1 });
-
-		console.log('getUserOrders - найденные заказы:', orders);
 		res.json(orders);
 	} catch (error) {
-		console.error('Ошибка при получении заказов пользователя:', error);
-		res.status(500).json({ message: 'Ошибка при получении заказов пользователя' });
+		console.error('Error fetching user orders:', error);
+		res.status(500).json({ message: 'Ошибка при получении заказов' });
 	}
 }; 

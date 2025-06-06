@@ -18,6 +18,7 @@ const corsOptions = {
 		const allowedOrigins = [
 			'https://www.nadius.ru',
 			'https://nadius.ru',
+			'https://api.nadius.ru',
 			'http://localhost:3000',
 			'http://localhost:5173',
 			'http://127.0.0.1:3000',
