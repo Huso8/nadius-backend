@@ -34,18 +34,14 @@ router.get('/:id', auth, async (req: Request, res: Response) => {
 router.post('/', auth, createOrder);
 
 // Обновить статус заказа
-router.patch('/:id/status', auth, async (req: Request, res: Response) => {
+router.patch('/:id/status', adminAuth, async (req: Request, res: Response) => {
 	try {
-		// Проверяем, является ли пользователь админом
-		if (req.user?.role !== 'admin') {
-			return res.status(403).json({ message: 'Доступ запрещен' });
-		}
 		const { status } = req.body;
 		const order = await Order.findByIdAndUpdate(
 			req.params.id,
 			{ status },
 			{ new: true }
-		).populate('items.product');
+		).populate('products.product');
 
 		if (!order) {
 			return res.status(404).json({ message: 'Заказ не найден' });

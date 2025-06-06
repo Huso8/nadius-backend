@@ -81,17 +81,24 @@ export const createOrder = async (req: Request, res: Response) => {
 export const updateOrderStatus = async (req: Request, res: Response) => {
 	try {
 		const { status } = req.body;
+
+		// Проверяем, что статус соответствует допустимым значениям
+		if (!['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
+			return res.status(400).json({ message: 'Недопустимый статус заказа' });
+		}
+
 		const order = await Order.findByIdAndUpdate(
 			req.params.id,
 			{ status },
 			{ new: true }
-		).populate('items.product');
+		).populate('products.product');
 
 		if (!order) {
 			return res.status(404).json({ message: 'Заказ не найден' });
 		}
 		res.json(order);
 	} catch (error) {
+		console.error('Error updating order status:', error);
 		res.status(400).json({ message: 'Ошибка при обновлении статуса заказа' });
 	}
 };
