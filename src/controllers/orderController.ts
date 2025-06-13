@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Order from '../models/Order';
+import Order from '../models/orderModel';
 
 export const getOrders = async (req: Request, res: Response) => {
 	try {
@@ -17,10 +17,18 @@ export const getOrders = async (req: Request, res: Response) => {
 export const getOrder = async (req: Request, res: Response) => {
 	try {
 		const order = await Order.findById(req.params.id)
-			.populate('items.product');
+			.populate('products.product')
+			.populate('user', 'name email');
+
 		if (!order) {
 			return res.status(404).json({ message: 'Заказ не найден' });
 		}
+
+		// Проверяем, является ли пользователь админом или владельцем заказа
+		if (req.user?.role !== 'admin' && order.user._id.toString() !== req.user?.userId) {
+			return res.status(403).json({ message: 'Доступ запрещен' });
+		}
+
 		res.json(order);
 	} catch (error) {
 		res.status(500).json({ message: 'Ошибка при получении заказа' });
@@ -82,7 +90,6 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 	try {
 		const { status } = req.body;
 
-		// Проверяем, что статус соответствует допустимым значениям
 		if (!['pending', 'processing', 'completed', 'cancelled'].includes(status)) {
 			return res.status(400).json({ message: 'Недопустимый статус заказа' });
 		}

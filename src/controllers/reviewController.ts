@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Review from '../models/Review';
+import Review from '../models/reviewModel';
 import mongoose from 'mongoose';
 
 export const addReview = async (req: Request, res: Response) => {
@@ -20,14 +20,12 @@ export const addReview = async (req: Request, res: Response) => {
 export const getProductReviews = async (req: Request, res: Response) => {
 	try {
 		const { productId } = req.params;
-		// console.log('Getting reviews for product:', productId);
 
 		if (!mongoose.Types.ObjectId.isValid(productId)) {
 			return res.status(400).json({ message: 'Некорректный ID продукта' });
 		}
 
 		const reviews = await Review.find({ product: productId }).populate('user', 'name');
-		// console.log('Found reviews:', reviews);
 		res.json(reviews);
 	} catch (error) {
 		console.error('Error in getProductReviews:', error);
@@ -38,17 +36,12 @@ export const getProductReviews = async (req: Request, res: Response) => {
 export const getProductRating = async (req: Request, res: Response) => {
 	try {
 		const { productId } = req.params;
-		// console.log('Getting rating for product:', productId);
-
 		if (!mongoose.Types.ObjectId.isValid(productId)) {
 			return res.status(400).json({ message: 'Некорректный ID продукта' });
 		}
 
 		const reviews = await Review.find({ product: productId });
-		// console.log('Found reviews for rating:', reviews);
-
 		if (reviews.length === 0) {
-			// console.log('No reviews found for product:', productId);
 			return res.json({ rating: 0, count: 0 });
 		}
 
@@ -57,7 +50,6 @@ export const getProductRating = async (req: Request, res: Response) => {
 			rating: Number(rating.toFixed(1)),
 			count: reviews.length
 		};
-		// console.log('Calculated rating:', result);
 		res.json(result);
 	} catch (error) {
 		console.error('Error in getProductRating:', error);

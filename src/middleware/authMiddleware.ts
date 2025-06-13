@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { config } from '../config/config';
 
 interface JwtPayload {
 	userId: string;
 	role: string;
+	iat?: number;
+	exp?: number;
 }
 
 declare global {
@@ -24,23 +25,33 @@ export const auth = async (req: Request, res: Response, next: NextFunction) => {
 			return res.status(401).json({ message: 'Требуется авторизация' });
 		}
 
-		const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
+		const decoded = jwt.verify(token, config.jwtSecret) as JwtPayload;
+
 		req.user = decoded;
 		next();
 	} catch (error) {
-		res.status(401).json({ message: 'Неверный токен авторизации' });
+		if (error instanceof jwt.JsonWebTokenError) {
+			return res.status(401).json({ message: 'Неверный токен авторизации' });
+		}
+		if (error instanceof jwt.TokenExpiredError) {
+			return res.status(401).json({ message: 'Срок действия токена истек' });
+		}
+		res.status(401).json({ message: 'Ошибка авторизации' });
 	}
 };
 
 export const adminAuth = async (req: Request, res: Response, next: NextFunction) => {
 	try {
-		await auth(req, res, () => {
-			if (req.user?.role !== 'admin') {
+		auth(req, res, () => {
+			if (!req.user) {
+				return res.status(401).json({ message: 'Требуется авторизация' });
+			}
+			if (req.user.role !== 'admin') {
 				return res.status(403).json({ message: 'Доступ запрещен' });
 			}
 			next();
 		});
 	} catch (error) {
-		res.status(401).json({ message: 'Неверный токен авторизации' });
+		res.status(401).json({ message: 'Ошибка авторизации' });
 	}
 }; 

@@ -1,32 +1,26 @@
 import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import User from '../models/User';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import { config } from '../config/config';
+import User from '../models/userModel';
 
 export const register = async (req: Request, res: Response) => {
 	try {
 		const { email, password, name } = req.body;
-
 		const existingUser = await User.findOne({ email });
 		if (existingUser) {
 			return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
 		}
 
+		const hashedPassword = await bcrypt.hash(password, 10);
 		const user = new User({
 			email,
-			password,
+			password: hashedPassword,
 			name
 		});
-
 		await user.save();
 
-		const token = jwt.sign(
-			{ userId: user._id, role: user.role },
-			JWT_SECRET,
-			{ expiresIn: '24h' }
-		);
-
+		const token = jwt.sign({ userId: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
 		res.status(201).json({
 			data: {
 				token,
@@ -52,16 +46,12 @@ export const login = async (req: Request, res: Response) => {
 			return res.status(401).json({ message: 'Неверный email или пароль' });
 		}
 
-		const isMatch = await user.comparePassword(password);
+		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
 			return res.status(401).json({ message: 'Неверный email или пароль' });
 		}
 
-		const token = jwt.sign(
-			{ userId: user._id, role: user.role },
-			JWT_SECRET,
-			{ expiresIn: '24h' }
-		);
+		const token = jwt.sign({ userId: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
 
 		res.json({
 			data: {

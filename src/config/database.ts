@@ -1,9 +1,8 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
+import { config } from './config';
 
 dotenv.config();
-
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/nadius';
 
 export const connectDB = async () => {
 	try {
@@ -12,7 +11,7 @@ export const connectDB = async () => {
 			console.log('Already connected to MongoDB');
 			return;
 		}
-		await mongoose.connect(MONGODB_URI);
+		await mongoose.connect(config.mongoUri);
 		console.log('Connected to MongoDB successfully');
 	} catch (error) {
 		console.error('MongoDB connection error:', error);

@@ -1,12 +1,13 @@
 import { Request, Response } from 'express';
+import { config } from '../config/config';
 import axios from 'axios';
 
 export const getAddressSuggestions = async (req: Request, res: Response) => {
 	try {
 		const { query } = req.query;
-		const YANDEX_API_KEY = process.env.YANDEX_API_KEY;
 
-		if (!YANDEX_API_KEY) {
+
+		if (!config.yandexApi) {
 			return res.status(500).json({ message: 'API ключ не настроен' });
 		}
 
@@ -16,7 +17,7 @@ export const getAddressSuggestions = async (req: Request, res: Response) => {
 
 		const url = 'https://geocode-maps.yandex.ru/1.x/';
 		const params = {
-			apikey: YANDEX_API_KEY,
+			apikey: config.yandexApi,
 			format: 'json',
 			geocode: query,
 			lang: 'ru_RU',
