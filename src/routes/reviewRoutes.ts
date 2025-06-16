@@ -4,7 +4,7 @@ import { auth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', auth, addReview);
+router.post('/:productId', auth, addReview);
 router.get('/:productId', getProductReviews);
 router.get('/:productId/rating', getProductRating);
 

@@ -6,7 +6,6 @@ export const getAddressSuggestions = async (req: Request, res: Response) => {
 	try {
 		const { query } = req.query;
 
-
 		if (!config.yandexApi) {
 			return res.status(500).json({ message: 'API ключ не настроен' });
 		}
@@ -21,7 +20,8 @@ export const getAddressSuggestions = async (req: Request, res: Response) => {
 			format: 'json',
 			geocode: query,
 			lang: 'ru_RU',
-			results: 5
+			results: 5,
+			bbox: '36.8,55.1~38.2,56.1'
 		};
 
 		const response = await axios.get(url, { params });
@@ -30,12 +30,22 @@ export const getAddressSuggestions = async (req: Request, res: Response) => {
 			return res.json({ results: [] });
 		}
 
-		const suggestions = response.data.response.GeoObjectCollection.featureMember.map((item: any) => ({
-			title: item.GeoObject.name,
-			subtitle: item.GeoObject.metaDataProperty.GeocoderMetaData.text,
-			lat: item.GeoObject.Point.pos.split(' ')[1],
-			lon: item.GeoObject.Point.pos.split(' ')[0]
-		}));
+		const suggestions = response.data.response.GeoObjectCollection.featureMember
+			.map((item: any) => {
+				const address = item.GeoObject.metaDataProperty.GeocoderMetaData.text;
+				if (!address.toLowerCase().includes('москва') &&
+					!address.toLowerCase().includes('московская область')) {
+					return null;
+				}
+				return {
+					title: item.GeoObject.name,
+					subtitle: address,
+					lat: item.GeoObject.Point.pos.split(' ')[1],
+					lon: item.GeoObject.Point.pos.split(' ')[0]
+				};
+			})
+			.filter(Boolean)
+			.slice(0, 5);
 
 		res.json({ results: suggestions });
 	} catch (error) {

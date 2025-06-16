@@ -12,10 +12,9 @@ export const register = async (req: Request, res: Response) => {
 			return res.status(400).json({ message: 'Пользователь с таким email уже существует' });
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10);
 		const user = new User({
 			email,
-			password: hashedPassword,
+			password,
 			name
 		});
 		await user.save();
@@ -33,6 +32,7 @@ export const register = async (req: Request, res: Response) => {
 			}
 		});
 	} catch (error) {
+		console.error('Registration error:', error);
 		res.status(500).json({ message: 'Ошибка при регистрации' });
 	}
 };
@@ -40,19 +40,18 @@ export const register = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
 	try {
 		const { email, password } = req.body;
-
 		const user = await User.findOne({ email });
 		if (!user) {
 			return res.status(401).json({ message: 'Неверный email или пароль' });
 		}
+		const isMatch = await user.comparePassword(password);
 
-		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
+			console.log('Password does not match');
 			return res.status(401).json({ message: 'Неверный email или пароль' });
 		}
 
 		const token = jwt.sign({ userId: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
-
 		res.json({
 			data: {
 				token,
@@ -65,6 +64,7 @@ export const login = async (req: Request, res: Response) => {
 			}
 		});
 	} catch (error) {
+		console.error('Login error:', error);
 		res.status(500).json({ message: 'Ошибка при входе' });
 	}
 };
