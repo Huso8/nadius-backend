@@ -21,7 +21,9 @@ export interface IOrder extends Document {
 	user: mongoose.Types.ObjectId;
 	products: IOrderItem[];
 	totalAmount: number;
-	status: 'pending' | 'processing' | 'completed' | 'cancelled';
+	status: 'pending' | 'processing' | 'on_the_way' | 'completed' | 'cancelled';
+	paymentMethod: 'cash' | 'card';
+	paymentStatus: 'paid' | 'unpaid';
 	deliveryAddress: {
 		address: string;
 		coordinates: ICoordinates | null;
@@ -36,7 +38,6 @@ const orderSchema = new Schema({
 	user: {
 		type: Schema.Types.ObjectId,
 		ref: 'User',
-		required: true
 	},
 	products: [{
 		product: {
@@ -62,8 +63,11 @@ const orderSchema = new Schema({
 	},
 	status: {
 		type: String,
-		enum: ['pending', 'processing', 'completed', 'cancelled'],
+		enum: ['pending', 'processing', 'on_the_way', 'completed', 'cancelled'],
 		default: 'pending'
+	},
+	paymentMethod: {
+		type: String,
 	},
 	deliveryAddress: {
 		address: {

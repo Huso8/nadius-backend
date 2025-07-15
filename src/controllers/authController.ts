@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { config } from '../config/config';
 import User from '../models/userModel';
+import Order from '../models/orderModel';
 
 export const register = async (req: Request, res: Response) => {
 	try {
@@ -19,7 +20,7 @@ export const register = async (req: Request, res: Response) => {
 		});
 		await user.save();
 
-		const token = jwt.sign({ userId: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
+		const token = jwt.sign({ _id: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
 		res.status(201).json({
 			data: {
 				token,
@@ -51,7 +52,7 @@ export const login = async (req: Request, res: Response) => {
 			return res.status(401).json({ message: 'Неверный email или пароль' });
 		}
 
-		const token = jwt.sign({ userId: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
+		const token = jwt.sign({ _id: user._id, role: user.role }, config.jwtSecret, { expiresIn: '24h' });
 		res.json({
 			data: {
 				token,
@@ -71,10 +72,20 @@ export const login = async (req: Request, res: Response) => {
 
 export const me = async (req: Request, res: Response) => {
 	try {
-		const user = await User.findById(req.user?.userId);
+		const user = await User.findById(req.user?._id);
 		if (!user) {
 			return res.status(404).json({ message: 'Пользователь не найден' });
 		}
+
+		// Привязываем гостевые заказы к пользователю по email и телефону
+		await Order.updateMany(
+			{
+				user: { $exists: false },
+				'contactInfo.email': user.email,
+				'contactInfo.phone': user.phone
+			},
+			{ $set: { user: user._id } }
+		);
 
 		res.json({
 			data: {

@@ -2,11 +2,11 @@ import { Request, Response } from 'express';
 import Review from '../models/reviewModel';
 import mongoose from 'mongoose';
 
-export const addReview = async (req: Request, res: Response) => {
+export const addProductReview = async (req: Request, res: Response) => {
 	try {
 		const { productId } = req.params;
 		const { rating, comment } = req.body;
-		const user = req.user?.userId;
+		const user = req.user?._id;
 
 		if (!user) return res.status(401).json({ message: 'Необходима авторизация' });
 		if (!productId || !rating) return res.status(400).json({ message: 'Некорректные данные' });
@@ -35,6 +35,31 @@ export const addReview = async (req: Request, res: Response) => {
 	}
 };
 
+export const addGeneralReview = async (req: Request, res: Response) => {
+	try {
+		const { rating, comment, guestName, guestEmail, guestPhone } = req.body;
+		const user = req.user?._id;
+
+		if (!rating) return res.status(400).json({ message: 'Рейтинг обязателен' });
+
+		let reviewData: any = { rating, comment };
+		if (user) {
+			reviewData.user = user;
+		} else {
+			if (guestName) reviewData.guestName = guestName;
+			if (guestEmail) reviewData.guestEmail = guestEmail;
+			if (guestPhone) reviewData.guestPhone = guestPhone;
+		}
+
+		const review = new Review(reviewData);
+		await review.save();
+		res.status(201).json(review);
+	} catch (error) {
+		console.error('Error in addGeneralReview:', error);
+		res.status(400).json({ message: 'Ошибка при добавлении отзыва' });
+	}
+};
+
 export const getProductReviews = async (req: Request, res: Response) => {
 	try {
 		const { productId } = req.params;
@@ -47,7 +72,17 @@ export const getProductReviews = async (req: Request, res: Response) => {
 		res.json(reviews);
 	} catch (error) {
 		console.error('Error in getProductReviews:', error);
-		res.status(500).json({ message: 'Ошибка при получении отзывов' });
+		res.status(500).json({ message: 'Server error' });
+	}
+};
+
+export const getAllReviews = async (req: Request, res: Response) => {
+	try {
+		const reviews = await Review.find({}).populate('user', 'name').sort({ createdAt: -1 });
+		res.json(reviews);
+	} catch (error) {
+		console.error('Error in getAllReviews:', error);
+		res.status(500).json({ message: 'Server error' });
 	}
 };
 

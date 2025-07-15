@@ -6,7 +6,7 @@ import {
 	updateOrderStatus,
 	getUserOrders
 } from '../controllers/orderController';
-import { auth } from '../middleware/authMiddleware';
+import { auth, optionalAuth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
@@ -17,10 +17,10 @@ router.get('/', auth, getOrders);
 router.get('/my-orders', auth, getUserOrders);
 
 // Получить заказ по ID
-router.get('/:id', auth, getOrder);
+router.get('/:id', getOrder);
 
 // Создать новый заказ
-router.post('/', auth, createOrder);
+router.post('/', optionalAuth, createOrder);
 
 // Обновить статус заказа (только для админов)
 router.patch('/:id/status', auth, updateOrderStatus);

@@ -1,10 +1,19 @@
 import express from 'express';
-import { addReview, getProductReviews, getProductRating } from '../controllers/reviewController';
+import {
+	addProductReview,
+	getProductReviews,
+	getProductRating,
+	getAllReviews,
+	addGeneralReview
+} from '../controllers/reviewController';
 import { auth } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/:productId', auth, addReview);
+router.get('/all', getAllReviews);
+router.post('/', addGeneralReview);
+
+router.post('/:productId', auth, addProductReview);
 router.get('/:productId', getProductReviews);
 router.get('/:productId/rating', getProductRating);
 
