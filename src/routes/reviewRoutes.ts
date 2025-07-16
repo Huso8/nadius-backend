@@ -1,8 +1,5 @@
 import express from 'express';
 import {
-	addProductReview,
-	getProductReviews,
-	getProductRating,
 	getAllReviews,
 	addGeneralReview
 } from '../controllers/reviewController';
@@ -12,9 +9,6 @@ const router = express.Router();
 
 router.get('/all', getAllReviews);
 router.post('/', addGeneralReview);
-
-router.post('/:productId', auth, addProductReview);
-router.get('/:productId', getProductReviews);
-router.get('/:productId/rating', getProductRating);
+router.post('/general', auth, addGeneralReview);
 
 export default router; 
