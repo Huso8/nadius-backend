@@ -98,4 +98,51 @@ export const me = async (req: Request, res: Response) => {
 	} catch (error) {
 		res.status(500).json({ message: 'Ошибка при получении данных пользователя' });
 	}
+};
+
+
+export const getUsers = async (req: Request, res: Response) => {
+	try {
+		if (req.user?.role !== 'admin') {
+			return res.status(403).json({ message: 'Доступ запрещен' });
+		}
+
+		const users = await User.find().select('-password').sort({ createdAt: -1 });
+		res.json(users);
+	} catch (error) {
+		console.error('Error fetching users:', error);
+		res.status(500).json({ message: 'Ошибка при получении пользователей' });
+	}
+};
+
+
+export const deleteUser = async (req: Request, res: Response) => {
+	try {
+		if (req.user?.role !== 'admin') {
+			return res.status(403).json({ message: 'Доступ запрещен' });
+		}
+
+		const { id } = req.params;
+		const userToDelete = await User.findById(id);
+
+		if (!userToDelete) {
+			return res.status(404).json({ message: 'Пользователь не найден' });
+		}
+
+		// Запрещаем удалять админов
+		if (userToDelete.role === 'admin') {
+			return res.status(403).json({ message: 'Нельзя удалить администратора' });
+		}
+
+		// Запрещаем удалять самого себя
+		if (userToDelete._id.toString() === req.user._id.toString()) {
+			return res.status(403).json({ message: 'Нельзя удалить самого себя' });
+		}
+
+		await User.findByIdAndDelete(id);
+		res.json({ message: 'Пользователь успешно удален' });
+	} catch (error) {
+		console.error('Error deleting user:', error);
+		res.status(500).json({ message: 'Ошибка при удалении пользователя' });
+	}
 }; 

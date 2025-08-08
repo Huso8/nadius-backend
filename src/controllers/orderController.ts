@@ -3,9 +3,6 @@ import mongoose from 'mongoose';
 import Order, { IOrder } from '../models/orderModel';
 import Product from '../models/productModel';
 
-// @desc    Create new order
-// @route   POST /api/orders
-// @access  Public
 export const createOrder = async (req: Request, res: Response) => {
 	try {
 		const {
@@ -54,9 +51,6 @@ export const createOrder = async (req: Request, res: Response) => {
 	}
 };
 
-// @desc    Get all orders
-// @route   GET /api/orders
-// @access  Admin
 export const getOrders = async (req: Request, res: Response) => {
 	try {
 		if (req.user?.role !== 'admin') {
@@ -70,9 +64,6 @@ export const getOrders = async (req: Request, res: Response) => {
 	}
 };
 
-// @desc    Get order by ID
-// @route   GET /api/orders/:id
-// @access  Private
 export const getOrder = async (req: Request, res: Response) => {
 	try {
 		const order = await Order.findById(req.params.id)
@@ -89,9 +80,6 @@ export const getOrder = async (req: Request, res: Response) => {
 	}
 };
 
-// @desc    Get logged in user orders
-// @route   GET /api/orders/my-orders
-// @access  Private
 export const getUserOrders = async (req: Request, res: Response) => {
 	try {
 		if (!req.user) {
@@ -104,9 +92,6 @@ export const getUserOrders = async (req: Request, res: Response) => {
 	}
 };
 
-// @desc    Update order status
-// @route   PATCH /api/orders/:id/status
-// @access  Admin
 export const updateOrderStatus = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
